@@ -136,8 +136,9 @@ public class FileBuilder {
         return toAbsolutePath(baseDir + "\\" + className.replaceAll("\\.", "/") + ".java");
     }
 
-    private ClassCode processFile(String fileName, String baseDir) throws IOException {
+    private ClassCode processFile(String fileName, String baseDir) throws IOException { 	
         knownFiles.add(toAbsolutePath(fileName));
+    	
         final List<String> fileContent = readFile(fileName);
         final ClassCode code = readFileContent(fileName, fileContent, baseDir);
         readPackageClasses(fileName, baseDir);
@@ -157,9 +158,10 @@ public class FileBuilder {
         final ClassCode code = new ClassCode(fileName);
         boolean fileKeyWordRead = false;
         boolean insideComment = false;
+        boolean cleanline = false;
         String previousLine = "";
         for (final String line : fileContent) {
-            String trimedLine = cleanLine(line, previousLine);
+            String trimedLine = cleanline ? cleanLine(line, previousLine): line;
             if (insideComment) {
                 if (trimedLine.contains(END_COMMENT)) {
                     insideComment = false;
@@ -192,7 +194,7 @@ public class FileBuilder {
     private String cleanLine(String line, String previousLine) {
         String concat = line;
         if (canPublicRemove(concat, previousLine)) {
-            concat = concat.replaceAll("public ", " ");
+            //concat = concat.replaceAll("public ", " ");
         }
         concat = concat.replace('\t', ' ').trim();
         String clean;
@@ -206,7 +208,7 @@ public class FileBuilder {
             clean = clean.replaceAll(" \\" + str, str).
                     replaceAll("\\" + str + " ", str);
         }
-        return clean;
+        return concat;
     }
 
     private boolean canPublicRemove(String concat, String previousLine) {
@@ -310,12 +312,12 @@ public class FileBuilder {
             lines.add(line);
         }
 
-        for (int i = lines.size() - 1; i > 0; i--) {
+        /*for (int i = lines.size() - 1; i > 0; i--) {
             if (lines.get(i).replace('}', ' ').trim().isEmpty() && lines.get(i - 1).indexOf("//") == -1) {
                 lines.set(i - 1, lines.get(i - 1) + lines.get(i));
                 lines.remove(i);
             }
-        }
+        }*/
         try {
             Files.write(Paths.get(outputFile), lines, CHARSET);
         } catch (final IOException e) {

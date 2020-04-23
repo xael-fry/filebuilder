@@ -1,30 +1,39 @@
 var gulp = require('gulp');
+var watch = require('gulp-watch');
 var exec = require('child_process').exec;
 var gutil = require('gulp-util');
 
-var src = "D:\\docs\\Google Drive\\tech\\workspaces\\CodG\\src\\main\\java";
-var playerPath = src + "\\jeu\\impl\\Player.java";
-var dest = "D:\\docs\\Google Drive\\tech\\workspaces\\CodG\\sync";
-var filebuilder = "java -jar ..\\..\\..\\..\\target\\filebuilder-0.0.1-SNAPSHOT.jar ";
+var src = "D:/dev/codingGame/oceanOfCode/src/main/java/oceanOfCode";
+var playerPath = src + "/Player.java";
+var dest = "D:\\dev\\codingGame\\oceanOfCode\\target";
+var filebuilder = "java -jar ../../../target/filebuilder.jar ";
 
-gulp.task('default', function () {
-   gulp.watch(src+'/**/*.java', ['concat', 'compile']);
-});
+
+gulp.task('build', function () { return console.log('Finish!'); });
 
 gulp.task('concat', function() {
-	exec(filebuilder + ' "' + playerPath + '" "' + dest+'"', function cb(err, stdout, stderr) {
-		gutil.log(stdout); // outputs the normal messages
-        gutil.log(stderr); // outputs the error messages
-        return 0; // makes gulp continue even if the command failed
-	}	
+	exec(filebuilder + ' "' + playerPath + '" "' + dest +'"', 
+        function cb(err, stdout, stderr) {
+            gutil.log('concat:' + stdout); // outputs the normal messages
+            gutil.log('concat error:' + (stderr == null)); // outputs the error messages
+        }	
 	);
+
+    
 });
 
 gulp.task('compile', function() {
-	exec('javac "' +dest + '\\Player.java" -d "'+dest+'\\compiled"', function cb(err, stdout, stderr) {
-		gutil.log(stdout); // outputs the normal messages
-        gutil.log(stderr); // outputs the error messages
-        return 0; // makes gulp continue even if the command failed
+	exec('javac "' + dest + '\\Player.java" -d "'+ dest +'\\compiled"', function cb(err, stdout, stderr) {
+		gutil.log('compile:' + stdout); // outputs the normal messages
+        gutil.log('compile error:' +stderr); // outputs the error messages 
 	}	
 	);
+    
+   
+});
+
+
+gulp.task('default', function() {
+   gutil.log('Watching ' + src +'/**/*.java'); 
+   return watch(src +'/**/*.java*', gulp.series('concat', 'compile', 'build'));
 });
